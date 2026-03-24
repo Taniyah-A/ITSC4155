@@ -49,6 +49,4 @@ class Questions(Base):
 
 
 
-    username = Column(String(100), unique=True, nullable=False, index=True)
-    email = Column(String(255), unique=True, index=True)
-    password = Column(String(255), nullable=False)
+    
