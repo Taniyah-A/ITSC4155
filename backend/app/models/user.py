@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, DateTime,ForeignKey,Enum
+from sqlalchemy import Column, Integer, String, DateTime,ForeignKey,Enum,Boolean
 from app.db.database import Base
 import datetime
 import enum
@@ -44,7 +44,30 @@ class Questions(Base):
     question_text = Column(String(250),nullable=False)
     correct_ans = Column(String(250), nullable=False)
 
+class AnswerChoices(Base):
+    __tablename__ = "answer_choices"
+    id = Column(Integer, primary_key=True, index=True)
+    questions_id = Column(Integer, ForeignKey('questions.id'), nullable=False)
+    choice_text = Column(String(250), nullable=False)
+    is_correct = Column(Boolean, default=False)
 
+class UserAnswer(Base):
+    __tablename__ = "user_answers"
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    questions_id = Column(Integer, ForeignKey('questions.id'), nullable=True)
+    free_response_text = Column(String(500), nullable=True)
+    is_correct = Column(Boolean, nullable=True)
+    answered_at = Column(DateTime, default=datetime.datetime.utcnow)
+
+class UserProgress(Base):
+    __tablename__ = "user_progress"
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
+    topic_id = Column(Integer, ForeignKey('topic.id'), nullable=False)
+    times_attempted = Column(Integer, default=0)
+    times_correct = Column(Integer, default=0)
+    last_attempted = Column(DateTime, default=datetime.datetime.utcnow)
     
 
 
