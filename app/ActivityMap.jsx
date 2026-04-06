@@ -70,6 +70,8 @@ export default function ActivityMap() {
                             onPress={() => {
                                 if (level.id === 1) {
                                     router.push("/activities/oneToOne");
+                                } else if (level.id === 2) {
+                                    router.push("/activities/subitizing");
                                 }
                             }}
                             >
