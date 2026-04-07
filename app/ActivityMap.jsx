@@ -72,6 +72,8 @@ export default function ActivityMap() {
                                     router.push("/activities/oneToOne");
                                 } else if (level.id === 2) {
                                     router.push("/activities/subitizing");
+                                } else if (level.id === 3){
+                                    router.push("/activities/cardinality");
                                 }
                             }}
                             >
@@ -133,7 +135,7 @@ export default function ActivityMap() {
                             />
                         </TouchableOpacity>
 
-                        <TouchableOpacity>
+                        <TouchableOpacity onPress={() => router.push("/tabs/profileSettings")}>
                             <Image 
                                 source={require("../assets/images/avatar.jpeg")}
                                 style={styles.navImageAvatar}
