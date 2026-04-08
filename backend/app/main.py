@@ -3,6 +3,7 @@ from fastapi import FastAPI, Depends, HTTPException, Security
 from sqlalchemy.orm import Session
 from fastapi.security import HTTPBearer
 from app.db.database import SessionLocal, engine, Base
+from fastapi.middleware.cors import CORSMiddleware
 
 # Models
 from app.models.user import User, Parents
@@ -42,22 +43,6 @@ def read_root():
 # ----------------------
 # Student Routes
 # ----------------------
-# @app.post("/register", response_model=UserResponse)
-# def student_register(user: UserCreate, db: Session = Depends(get_db)):
-#     existing = db.query(User).filter((User.username == user.username) | (User.email == user.email)).first()
-#     if existing:
-#         raise HTTPException(status_code=400, detail="Username or email already exists")
-
-#     new_user = User(
-#         username=user.username,
-#         email=user.email,
-#         password_hash=hash_password(user.password)
-#     )
-
-#     db.add(new_user)
-#     db.commit()
-#     db.refresh(new_user)
-#     return new_user
 
 @app.post("/student/login")
 def student_login(user: UserLogin, db: Session = Depends(get_db)):
@@ -130,11 +115,10 @@ def create_child(
     if current["role"] != "parent":
         raise HTTPException(status_code = 403, detail="Only parent can create child account")
     existing = db.query(User).filter(
-        (User.username == user.username) | (User.email == user.email)
-    ).first()
+        (User.username == user.username)).first()
 
     if existing:
-        raise HTTPException(status_code=400, detail="Username or email already exists")
+        raise HTTPException(status_code=400, detail="Username already exists")
     
     parent = db.query(Parents).filter(Parents.username == current["sub"]).first()
 
@@ -143,7 +127,6 @@ def create_child(
 
     new_user = User(
         username = user.username,
-        email = user.email,
         password_hash = hash_password(user.password),
         parent_id = parent.id
     )
@@ -173,3 +156,14 @@ def get_children(db:Session = Depends(get_db), current=Depends(get_current_user)
     parent = db.query(Parents).filter(Parents.username == current["sub"]).first()
     
     return parent.children
+
+#-----------------------
+# Enable CORS
+#-----------------------
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=['http://localhost:3000'],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
