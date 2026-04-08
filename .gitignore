@@ -41,3 +41,7 @@ app-example
 # generated native folders
 /ios
 /android
+node_modules/
+.bin/
+node_modules/
+frontend/node_modules/
