@@ -1,52 +1,44 @@
 import React from 'react';
 import { StyleSheet, Text, View, TouchableOpacity, Image, SafeAreaView } from 'react-native';
-import { Link } from 'expo-router'; // This allows you to move to the next page
+import { router } from 'expo-router';
 
-export default function HomeScreen() {
+export default function WelcomeScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.content}>
-        
         {/* Welcome Text */}
         <Text style={styles.welcomeText}>Welcome to</Text>
         <Text style={styles.brandName}>Brainy Buddy</Text>
+        <Text style={styles.subtitle}>Who's Joining today?</Text>
 
-        {/* Character Illustration */}
+        {/* App Character */}
         <View style={styles.illustrationContainer}>
-          <View style={styles.sunCircle} />
-          {/* Replace this URI with your local image: require('../assets/images/your-file.png') */}
+          <View/>
           <Image 
-            source={{ uri: 'https://via.placeholder.com/150' }} 
+            source={require("../assets/images/brainyBuddy.png")}
             style={styles.character} 
           />
         </View>
 
         {/* Navigation Buttons */}
         <View style={styles.buttonStack}>
-
-          {/* Sign in button */}
-          <Link href="/SignIn" asChild>
-            <TouchableOpacity style={[styles.button, styles.signInBtn]}>
-            <Text style={styles.buttonText}>Sign in</Text>
+          <TouchableOpacity
+            style={[styles.button, styles.parentBtn]}
+            onPress={() => router.push("/parentAuth")}
+          >
+            <Text style={styles.buttonText}>I'm a Parent</Text>
+            {/* Perhaps add a parent Icon? */}
           </TouchableOpacity>
-          </Link>
 
-          {/* This Link wraps the button to go to your CreateProfile page */}
-          <Link href="/CreateProfile" asChild>
-            <TouchableOpacity style={[styles.button, styles.createBtn]}>
-              <Text style={[styles.buttonText, { color: 'white' }]}>
-                Create an account!
-              </Text>
-            </TouchableOpacity>
-          </Link>
-
-          {/* Temporary button to test the activity map*/}
-          <Link href="/ActivityMap" asChild>
-            <TouchableOpacity style={[styles.button, { backgroundColor: "#57c7ff"}]}>
-              <Text style={styles.buttonText}>Start</Text>
-            </TouchableOpacity>
-          </Link>
+          <TouchableOpacity
+           style={[styles.button, styles.childBtn]}
+           onPress={() => router.push("/childLogin")}
+          >
+            <Text style={styles.buttonText}>I'm a Student</Text>
+          </TouchableOpacity>
         </View>
+
+        <Text style={styles.footerText}> Learning starts here</Text>
 
       </View>
     </SafeAreaView>
@@ -56,19 +48,19 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#70F3FF', // The bright blue from your screenshot
+    backgroundColor: '#7EE8FA',
   },
   content: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    padding: 20,
+    padding: 24,
   },
   welcomeText: {
     fontSize: 28,
     color: 'white',
-    fontWeight: '600',
-    marginBottom: -5,
+    fontWeight: '700',
+    marginBottom: -4,
   },
   brandName: {
     fontSize: 42,
@@ -77,12 +69,18 @@ const styles = StyleSheet.create({
     textShadowColor: 'rgba(0, 0, 0, 0.2)',
     textShadowOffset: { width: 2, height: 2 },
     textShadowRadius: 3,
-    marginBottom: 40,
+    marginBottom: 8,
+  },
+  subtitle: {
+    fontSize: 18,
+    color: 'black',
+    fontWeight: "700",
+    marginBottom: 30,
   },
   illustrationContainer: {
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 60,
+    marginBottom: 50,
   },
   sunCircle: {
     position: 'absolute',
@@ -95,24 +93,25 @@ const styles = StyleSheet.create({
     width: 160,
     height: 160,
     resizeMode: 'contain',
+    borderRadius: 80,
   },
   buttonStack: {
     width: '100%',
-    maxWidth: 300,
-    gap: 15,
+    maxWidth: 320,
+    gap: 16,
   },
   button: {
-    paddingVertical: 16,
+    paddingVertical: 18,
     borderRadius: 30,
     alignItems: 'center',
     borderWidth: 2,
     borderColor: '#000',
-    elevation: 5, // Adds shadow on Android
+    elevation: 5,
   },
-  signInBtn: {
+  parentBtn: {
     backgroundColor: '#FFB800',
   },
-  createBtn: {
+  childBtn: {
     backgroundColor: '#FF6B6B',
     borderColor: '#fff',
   },
@@ -121,4 +120,10 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#000',
   },
+  footerText: {
+    marginTop: 30,
+    fontSize: 16,
+    color: "#355C9a",
+    fontWeight: "700",
+  }
 });
