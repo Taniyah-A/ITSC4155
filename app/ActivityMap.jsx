@@ -122,14 +122,14 @@ export default function ActivityMap() {
                         <TouchableOpacity>
                             <Image 
                                 source={require("../assets/images/achievement.png")}
-                                style={styles.navImage}
+                                style={styles.navAchievement}
                             />
                         </TouchableOpacity>
 
                         <TouchableOpacity>
                             <Image 
                                 source={require("../assets/images/stats.png")}
-                                style={styles.navImage}
+                                style={styles.navAchievement}
                             />
                         </TouchableOpacity>
 
@@ -264,6 +264,11 @@ const styles = StyleSheet.create({
     navImage: {
         width: 30,
         height: 30,
+        resizeMode: "contain",
+    },
+    navAchievement : {
+        width: 40,
+        height: 40,
         resizeMode: "contain",
     },
 
