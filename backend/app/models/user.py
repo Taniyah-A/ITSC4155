@@ -1,5 +1,5 @@
 from sqlalchemy import Column, Integer, String, DateTime,ForeignKey,Enum,Boolean
-from app.db.database import Base
+from backend.app.db.database import Base
 import datetime
 import enum
 

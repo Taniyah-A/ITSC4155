@@ -2,12 +2,12 @@ from fastapi import FastAPI, Depends, HTTPException
 from sqlalchemy.orm import Session
 from fastapi.security import HTTPBearer
 
-from app.db.database import SessionLocal, engine, Base
+from backend.app.db.database import SessionLocal, engine, Base
 
 # Import ALL models first before create_all
-from app.models.user import User
-from app.schemas.user_schema import UserCreate, UserResponse, UserLogin
-from app.routes.auth import create_access_token, hash_password, verify_password
+from backend.app.models.user import User, Topic, Questions, AnswerChoices, UserAnswer, UserProgress
+from backend.app.schemas.user_schema import UserCreate, UserResponse, UserLogin
+from backend.app.routes.auth import create_access_token, hash_password, verify_password
 
 # Now create tables — models are registered to Base
 Base.metadata.create_all(bind=engine)
@@ -46,3 +46,20 @@ def login(user:UserLogin, db: Session = Depends(get_db)):
         raise HTTPException(status_code=400, detail="Incorrect Password or Username")
     access_token = create_access_token(data={"sub": db_user.username})
     return {"access_token": access_token, "token_type": "bearer","user": db_user.username}
+
+@app.get("/question")
+def get_question(db: Session = Depends(get_db)):
+    question = db.query(Questions).all() 
+    #make it filter based on seleected mode?
+    #db.query(Questions).filter(Questions.difficulty == "easy").all()
+
+    choices = db.query(AnswerChoices).filter(AnswerChoices.question_id == question.id).all()
+
+    if not question:
+        raise HTTPException(status_code=404, detail="No questions found in db")
+    
+    return {
+        "question": question.question_text,
+        "choices": [c.choice_text for c in choices],
+        "correct_answer": question.correct_ans
+    }
