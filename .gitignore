@@ -41,23 +41,21 @@ app-example
 # generated native folders
 /ios
 /android
-node_modules/
-.bin/
-node_modules/
-frontend/node_modules/
 
-# python
+
+# Python cache
 __pycache__/
 *.pyc
-*.pyo
-*.pyd
 
-# python virtual environments
-venv/
-.env
-
-# database files
+# Database
 *.db
 
-# other
-*.sqlite3
+# Environment files
+.env
+
+# Optional but recommended
+backend/app/__pycache__/
+backend/app/db/__pycache__/
+backend/app/models/__pycache__/
+backend/app/routes/__pycache__/
+backend/app/schemas/__pycache__/

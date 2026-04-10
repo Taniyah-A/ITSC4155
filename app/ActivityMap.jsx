@@ -1,5 +1,5 @@
 import React, {useEffect, useRef, useState} from "react";
-import {router, useRouter} from 'expo-router';
+import {router} from 'expo-router';
 import {View, Text, ScrollView, Image, ImageBackground, TouchableOpacity, StyleSheet, Animated, Dimensions, SafeAreaView} from "react-native";
 
 const {width} = Dimensions.get("window");
@@ -15,7 +15,7 @@ const levels = [
 export default function ActivityMap() {
     const [currentLevel, setCurrentLevel] = useState(1);
     const scrollRef = useRef(null);
-    const router = useRouter();
+
     const currentNode = levels.find((lvl) => lvl.id === currentLevel);
 
     const avatarX = useRef(new Animated.Value(currentNode.x + 15)).current;
@@ -113,27 +113,27 @@ export default function ActivityMap() {
             <SafeAreaView pointerEvents="box-none" style={styles.bottomOverlay}>
                 <View style={styles.bottomNav}>
                     {/* I need to change these to icons, later */}
-                        <TouchableOpacity onPress={() => router.push("/ActivityMap")}>
+                        <TouchableOpacity>
                             <Image 
                                     source={require("../assets/images/home.png")}
                                     style={styles.navImage}
                             />
                         </TouchableOpacity>
-                        <TouchableOpacity onPress={() => router.push("/achievements")}>
+                        <TouchableOpacity>
                             <Image 
                                 source={require("../assets/images/achievement.png")}
                                 style={styles.navImage}
                             />
                         </TouchableOpacity>
 
-                        <TouchableOpacity onPress={() => router.push("/stats")}>
+                        <TouchableOpacity>
                             <Image 
                                 source={require("../assets/images/stats.png")}
                                 style={styles.navImage}
                             />
                         </TouchableOpacity>
 
-                        <TouchableOpacity onPress={() => router.push("/tabs/profile")}>
+                        <TouchableOpacity onPress={() => router.push("/tabs/profileSettings")}>
                             <Image 
                                 source={require("../assets/images/avatar.jpeg")}
                                 style={styles.navImageAvatar}

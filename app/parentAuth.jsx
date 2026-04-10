@@ -10,6 +10,8 @@ import {
 } from "react-native";
 import { router } from "expo-router";
 import { API_BASE_URL } from "../lib/api";
+import { Assets } from "@react-navigation/elements";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function ParentAuthScreen() {
     const [mode, setMode] = useState("login");
@@ -19,7 +21,7 @@ export default function ParentAuthScreen() {
 
     const testBackend = async () => {
         try {
-            console.log("Testing backend at:", `$(API_BASE_URL)/docs`);
+            console.log("Testing backend at:", `${API_BASE_URL}/docs`);
 
             const response = await fetch(`${API_BASE_URL}/docs`);
             const text = await response.text();
@@ -31,7 +33,7 @@ export default function ParentAuthScreen() {
             } else {
                 Alert.alert("Error", `Backend responded with status ${response.status}`);
             }
-        } catch {
+        } catch (error) {
             console.log("Backend test error: ", error);
             Alert.alert("Error", "Could not connect to backend");
         }
@@ -73,8 +75,11 @@ export default function ParentAuthScreen() {
                 return;
             }
 
+            // if login successful, store the token value and got to parent dashboard
+            await AsyncStorage.setItem("token", data.access_token);
+            console.log("TOKEN SAVE:", data.access_token);
             Alert.alert("Success", "Logged in successfully!");
-            router.push("/createChild");
+            router.replace("/ParentDashboard")
         } catch (error) {
             console.log("Connection error:", error);
             Alert.alert("Error", "Could not connect to server");
