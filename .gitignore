@@ -51,7 +51,6 @@ __pycache__/
 *.pyc
 *.pyo
 *.pyd
-*.db
 
 # python virtual environments
 venv/

@@ -36,6 +36,10 @@ export default function WelcomeScreen() {
           >
             <Text style={styles.buttonText}>I'm a Student</Text>
           </TouchableOpacity>
+
+          <TouchableOpacity onPress={() => router.push("/ActivityMap")}>
+            <Text style={[styles.button, { backgroundColor: "#57c7ff"}]}>Temporary button to test activity page</Text>
+          </TouchableOpacity>
         </View>
 
         <Text style={styles.footerText}> Learning starts here</Text>
