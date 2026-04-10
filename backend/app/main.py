@@ -160,7 +160,6 @@ def get_children(db:Session = Depends(get_db), current=Depends(get_current_user)
     
     return parent.children
 
-<<<<<<< HEAD
 
 # ----------------------
 # Question Routes
@@ -208,7 +207,6 @@ def get_questions_by_grade(
         .filter(Questions.topic_id.in_(topic_ids))
         .all()
     )
-=======
 #-----------------------
 # Enable CORS
 #-----------------------
@@ -219,4 +217,7 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
->>>>>>> d33683a5ccfba503c6b9b4f3c5b51746ef9f86bb
+
+#-----------------------
+# Points Route
+#-----------------------
