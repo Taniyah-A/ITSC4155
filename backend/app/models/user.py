@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, DateTime,ForeignKey,Enum
+from sqlalchemy import Column, Integer, String, DateTime,ForeignKey,Enum, Boolean, UniqueConstraint
 from sqlalchemy.orm import relationship
 from app.db.database import Base
 import datetime
@@ -47,6 +47,11 @@ class Questions(Base):
     correct_ans = Column(String(250), nullable=False)
 
 
+    user = relationship("User")
+    topic = relationship("Topic")
+    __table_args__ = (
+        UniqueConstraint('user_id','topic_id'),
+    )
     
 
 

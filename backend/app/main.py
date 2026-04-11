@@ -1,4 +1,5 @@
 # app/main.py
+import datetime
 from fastapi import FastAPI, Depends, HTTPException, Security
 from sqlalchemy.orm import Session
 from fastapi.security import HTTPBearer
@@ -6,7 +7,7 @@ from app.db.database import SessionLocal, engine, Base
 from fastapi.middleware.cors import CORSMiddleware
 
 # Models
-from app.models.user import User, Parents
+from app.models.user import User, Parents,Topic, Questions,UserProgress
 
 # Schemas
 from app.schemas.user_schema import UserCreate, UserResponse, UserLogin
@@ -21,6 +22,17 @@ Base.metadata.create_all(bind=engine)
 # FastAPI app
 app = FastAPI()
 security = HTTPBearer()
+
+# #-----------------------
+# # Enable CORS
+# #-----------------------
+# app.add_middleware(
+#     CORSMiddleware,
+#     allow_origins=['http://localhost:3000'],
+#     allow_credentials=True,
+#     allow_methods=["*"],
+#     allow_headers=["*"],
+# )
 
 
 # DB dependency
@@ -160,10 +172,79 @@ def get_children(db:Session = Depends(get_db), current=Depends(get_current_user)
 #-----------------------
 # Enable CORS
 #-----------------------
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=['http://localhost:3000'],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+@app.post("/questions/answer")
+def answer_question(
+    question_id: int,
+    answer: str,
+    db: Session = Depends(get_db),
+    current=Depends(get_current_user)
+):
+    if current["role"] != "student":
+        raise HTTPException(status_code=403, detail="Only student allowed")
+    
+    question = db.query(Questions).filter(Questions.id == question_id).first()
+
+    if not question:
+        raise HTTPException(status_code=404, detail="Question not found")
+    
+    is_correct = question.correct_ans.lower() == answer.lower()
+    score = 10 if is_correct else 0
+
+    student = db.query(User).filter(User.username==current["sub"]).first()
+
+    progress = db.query(UserProgress).filter(
+        UserProgress.user_id == student.id,
+        UserProgress.topic_id == question.topic_id
+    ).first()
+
+    if not progress:
+        progress = UserProgress(
+            user_id = student.id,
+            topic_id = question.topic_id
+        )
+        db.add(progress)
+
+    progress.times_attempted += 1
+
+    if is_correct:
+        progress.times_correct += 1
+
+    progress.last_attempted = datetime.datetime.utc()
+    db.commit()
+
+    return {
+        "correct": is_correct,
+        "score": score,
+    }
+
+
+#-----------------
+#Progress Tracking
+#-----------------
+@app.get("/student/progress/topics")
+def get_topic_progress(
+    db: Session = Depends(get_db),
+    current=Depends(get_current_user)
+):
+    if current["role"] != "student":
+        HTTPException(status_code=403, detail="Not a child")
+
+    student = db.query(User).filter(
+        User.username==current["sub"]
+    ).first()
+    progress = db.query(UserProgress).filter(
+        UserProgress.user_id == student.id
+    ).all()
+
+    return [
+        {
+            "topic": p.topic.name,
+            "attempted": p.times_attempted,
+            "correct": p.times_correct,
+            "accuracy":(
+                p.time.correct / p.time_attempted * 100
+                if p.time_attempted > 0  else 0
+            )
+        }
+        for p in progress
+    ]
