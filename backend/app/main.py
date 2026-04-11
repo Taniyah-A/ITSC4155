@@ -110,7 +110,7 @@ def parent_login(parent: ParentLogin, db: Session = Depends(get_db)):
 
 
 # ----------------------
-# Protected Route Example
+# Protected Route
 # ----------------------
 def get_current_user(token=Security(security)):
     payload = decode_access_token(token.credentials)
@@ -170,7 +170,7 @@ def get_children(db:Session = Depends(get_db), current=Depends(get_current_user)
     return parent.children
 
 #-----------------------
-# Enable CORS
+# Question Answer
 #-----------------------
 @app.post("/questions/answer")
 def answer_question(
