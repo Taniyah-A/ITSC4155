@@ -3,16 +3,19 @@ from fastapi import FastAPI, Depends, HTTPException, Security
 from sqlalchemy.orm import Session, joinedload
 from typing import List, Optional
 from fastapi.security import HTTPBearer
-from app.db.database import SessionLocal, engine, Base
 from fastapi.middleware.cors import CORSMiddleware
 
 # Models
-from app.models.user import User, Parents,Topic, Questions
+from app.models.user import User, Parents,Topic, Questions, AnswerChoices, UserAnswer
 
 # Schemas
 from app.schemas.user_schema import UserCreate, UserResponse, UserLogin
 from app.schemas.parent_schema import ParentCreate, ParentLogin, ParentResponse
-from app.schemas.questions_schema import QuestionsSchema, TopicSchema
+from app.schemas.questions_schema import QuestionsSchema, TopicSchema, QuestionSubmitSchema
+
+
+from app.db.database import SessionLocal, engine, Base
+
 
 # Auth helpers
 from app.routes.auth import create_access_token, hash_password, verify_password, decode_access_token
@@ -23,6 +26,17 @@ Base.metadata.create_all(bind=engine)
 # FastAPI app
 app = FastAPI()
 security = HTTPBearer()
+
+#-----------------------
+# Enable CORS
+#-----------------------
+app.add_middleware(
+   CORSMiddleware,
+   allow_origins=["*"],
+   allow_credentials=True,
+   allow_methods=["*"],
+   allow_headers=["*"],
+)
 
 
 # DB dependency
@@ -140,6 +154,14 @@ def create_child(
 
     return new_user
 
+@app.post('/login')
+def login(user:UserLogin, db: Session = Depends(get_db)):
+    db_user = db.query(User).filter(User.username == user.username).first()
+    if not db_user or not verify_password(user.password, db_user.password_hash):
+        raise HTTPException(status_code=400, detail="Incorrect Password or Username")
+    access_token = create_access_token(data={"sub": db_user.username})
+    return {"access_token": access_token, "token_type": "bearer","user": db_user.username}
+
 
 @app.get("/dashboard")
 def dashboard(user=Depends(get_current_user)):
@@ -207,17 +229,47 @@ def get_questions_by_grade(
         .filter(Questions.topic_id.in_(topic_ids))
         .all()
     )
+
+@app.post("/questions/submit")
+def submit_question(
+    payload: QuestionSubmitSchema,
+    db: Session = Depends(get_db),
+    current_user = Depends(get_current_user)
+):
+    question = db.query(Questions).filter(Questions.id == payload.question_id).first()
+    if not question:
+        raise HTTPException(status_code=404, detail="Question not found")
+    
+    choice = db.query(AnswerChoices).filter(AnswerChoices.id == payload.answer_choice_id).first()
+    if not choice:
+        raise HTTPException(status_code=404, detail="Choice not found")
+    
+    is_correct = choice.is_correct == True
+
+    user_id = db.query(User).filter(User.username == current_user["sub"]).first().id
+    user_submission = UserAnswer(
+        user_id = user_id,
+        questions_id = payload.question_id,
+        is_correct = is_correct
+    )
+
+    db.add(user_submission)
+    db.commit()
+    db.refresh(user_submission)
+
+    return {
+        "message": "Answer Submitted!",
+        "is_correct":  is_correct
+    }
+
+    
 #-----------------------
 # Enable CORS
 #-----------------------
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=['http://localhost:3000'],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-#-----------------------
-# Points Route
-#-----------------------
+#@app.add_middleware(
+   # CORSMiddleware,
+   # allow_origins=['http://localhost:3000'],
+   # allow_credentials=True,
+   # allow_methods=["*"],
+   # allow_headers=["*"],
+#)

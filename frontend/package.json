@@ -1,0 +1,23 @@
+{
+  "name": "brainy-buddy-app",
+  "version": "1.0.0",
+  "description": "A kids learning appp aimed at children ages 4-6 to teach them essential math skils.",
+  "main": "main.py",
+  "scripts": {
+    "test": "\"not sure yet\"",
+    "start": "expo start"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Taniyah-A/ITSC4155.git"
+  },
+  "author": "Ini, Janvi, Jie, Shannah, Taniyah",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Taniyah-A/ITSC4155/issues"
+  },
+  "homepage": "https://github.com/Taniyah-A/ITSC4155#readme",
+  "devDependencies": {
+    "@react-native-community/cli": "latest"
+  }
+}

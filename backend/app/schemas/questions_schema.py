@@ -29,3 +29,7 @@ class TopicSchema(BaseModel):
 
     class Config:
         from_attributes = True
+
+class QuestionSubmitSchema(BaseModel):
+    question_id: int
+    answer_choice_id: int

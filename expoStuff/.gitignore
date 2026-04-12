@@ -36,29 +36,6 @@ yarn-error.*
 # typescript
 *.tsbuildinfo
 
-app-example
-
 # generated native folders
 /ios
 /android
-node_modules/
-.bin/
-node_modules/
-frontend/node_modules/
-
-# python
-__pycache__/
-*.pyc
-*.pyo
-*.pyd
-
-# python virtual environments
-venv/
-.env
-
-# database files
-*.db
-
-# other
-*.sqlite3
-node_modules
