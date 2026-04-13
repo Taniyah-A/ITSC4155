@@ -10,6 +10,7 @@ import {
 } from "react-native";
 import { router } from "expo-router";
 import { API_BASE_URL } from "../lib/api";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function ChildLoginScreen() {
     const [username, setUsername] = useState("");
@@ -31,6 +32,9 @@ export default function ChildLoginScreen() {
                 Alert.alert("Login Failed", data.detail || "Incorrect login");
                 return;
             }
+            await AsyncStorage.setItem("token", data.access_token);
+            await AsyncStorage.setItem("username", data.username);
+            await AsyncStorage.setItem("user_id", String(data.user_id));
 
             Alert.alert("Welcome!", `Hi ${data.username}!`);
             router.push("/ActivityMap");

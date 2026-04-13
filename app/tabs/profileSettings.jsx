@@ -1,5 +1,6 @@
 import { useRouter } from "expo-router";
-import { useState } from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useEffect, useState } from "react";
 import {
     Image,
     SafeAreaView,
@@ -13,6 +14,7 @@ import {
 
 const ProfilePage = () => {
   // States for the toggle switches
+  const [username, setUsername] = useState("");
   const router = useRouter();
   const [isNotificationsEnabled, setIsNotificationsEnabled] = useState(true);
   const [isMusicEnabled, setIsMusicEnabled] = useState(false);
@@ -39,6 +41,14 @@ const ProfilePage = () => {
     </TouchableOpacity>
   );
 
+  useEffect(() => {
+    const loadUser = async () => {
+      const name = await AsyncStorage.getItem("username");
+      setUsername(name || "User");
+    };
+    loadUser();
+  }, []);
+
   return (
     <View style={styles.container}>
       <ScrollView bounces={false} contentContainerStyle={styles.scrollContent} >
@@ -56,7 +66,7 @@ const ProfilePage = () => {
             source={require("../../assets/images/animals_left.png")}
             style={styles.leftAnimals}
           />
-          <Text style={styles.userName}>Jane Cooper</Text>
+          <Text style={styles.userName}>{username}</Text>
           <View style={styles.pointsBadge}>
             <Text style={styles.pointsText}>3520 ⭐</Text>
           </View>
