@@ -53,6 +53,11 @@ class UserProgress(Base):
     topic_id = Column(Integer, ForeignKey('topic.id'), nullable=False)
     times_attempted = Column(Integer, default=0)
     times_correct = Column(Integer, default=0)
+    
+    current_streak = Column(Integer, default=0)
+    wrong_streak = Column(Integer, default= 0)
+
+    difficulty_level = Column(Enum(DifficultyLevel), default=DifficultyLevel.easy)
     last_attempted = Column(DateTime, default=datetime.datetime.utcnow)
 
     user = relationship("User")

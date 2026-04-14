@@ -228,31 +228,34 @@ def answer_question(
 #-----------------
 #Progress Tracking
 #-----------------
-@app.get("/student/progress/topics")
-def get_topic_progress(
-    db: Session = Depends(get_db),
-    current=Depends(get_current_user)
+@app.get("/parent/children/{child_id}/progress")
+def get_child_progress(
+    child_id: int,
+    db:Session = Depends(get_db),
+    parent:Parents = Depends(get_current_parent)
 ):
-    if current["role"] != "student":
-        raise HTTPException(status_code=403, detail="Not a child")
-
-    student = db.query(User).filter(
-        User.username==current["sub"]
+    child = db.query(User).filter(
+        User.id == child_id,
+        User.parent_id == parent.id
     ).first()
+
+    if not child:
+        raise HTTPException(status_code=404, detail="Child not Found")
+    
     progress = db.query(UserProgress).filter(
-        UserProgress.user_id == student.id
+        UserProgress.child_id == child_id
     ).all()
 
     return [
         {
-            "topic": p.topic.name,
-            "attempted": p.times_attempted,
-            "correct": p.times_correct,
-            "accuracy":(
-                p.times_correct / p.times_attempted * 100
-                if p.times_attempted > 0  else 0,
-                2
-            )
+        "Topic": p.topic.name,
+        "Attempted": p.times_attempted,
+        "Correct": p.times_correct,
+        "Accuracy": round(
+        (p.times_correct /p.times_attempted * 100)
+        if p.times_attempted > 0 else 0,
+        2
+        )
         }
         for p in progress
     ]
