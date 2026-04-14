@@ -216,13 +216,37 @@ def answer_question(
 
     if is_correct:
         progress.times_correct += 1
+        progress.current_streak += 1
+        progress.wrong_streak = 0
+    else:
+        progress.wrong_streak += 1
+        progress.current_streak = 0
+
+    # Increase difficulty
+    if progress.current_streak >= 5:
+        if progress.difficulty_level == "easy":
+            progress.difficulty_level = "medium"
+        elif progress.difficulty_level == "medium":
+            progress.difficulty_level = "hard"
+        progress.current_streak = 0
+
+# Decrease difficulty
+    if progress.wrong_streak >= 2:
+        if progress.difficulty_level == "hard":
+            progress.difficulty_level = "medium"
+        elif progress.difficulty_level == "medium":
+            progress.difficulty_level = "easy"
+        progress.wrong_streak = 0
+
 
     progress.last_attempted = datetime.datetime.utcnow()
     db.commit()
 
     return {
-        "correct": is_correct,
-        "score": score,
+        "Correct": is_correct,
+        "Score": score,
+        "Streak": progress.current_streak,
+        "Diffculty": progress.difficulty_level
     }
 
 #-----------------
@@ -243,7 +267,7 @@ def get_child_progress(
         raise HTTPException(status_code=404, detail="Child not Found")
     
     progress = db.query(UserProgress).filter(
-        UserProgress.child_id == child_id
+        UserProgress.user_id == child_id
     ).all()
 
     return [
@@ -252,10 +276,12 @@ def get_child_progress(
         "Attempted": p.times_attempted,
         "Correct": p.times_correct,
         "Accuracy": round(
-        (p.times_correct /p.times_attempted * 100)
+        (p.times_correct / p.times_attempted * 100)
         if p.times_attempted > 0 else 0,
         2
-        )
+        ),
+        "Diffculty": p.difficulty_level,
+        "Streak": p.current_streak
         }
         for p in progress
     ]

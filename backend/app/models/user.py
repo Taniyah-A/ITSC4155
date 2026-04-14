@@ -45,12 +45,15 @@ class Questions(Base):
     question_type = Column(Enum(QuestionType),nullable=False)
     question_text = Column(String(250),nullable=False)
     correct_ans = Column(String(250), nullable=False)
+    topic = relationship("Topic")
 
 class UserProgress(Base):
     __tablename__ = "user_progress"
     id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
-    topic_id = Column(Integer, ForeignKey('topic.id'), nullable=False)
+    
+    user_id = Column(Integer, ForeignKey('users.id'), nullable=False, index = True)
+    topic_id = Column(Integer, ForeignKey('topic.id'), nullable=False, index = True)
+    
     times_attempted = Column(Integer, default=0)
     times_correct = Column(Integer, default=0)
     
@@ -60,11 +63,11 @@ class UserProgress(Base):
     difficulty_level = Column(Enum(DifficultyLevel), default=DifficultyLevel.easy)
     last_attempted = Column(DateTime, default=datetime.datetime.utcnow)
 
-    user = relationship("User")
+    user = relationship("User", backref= "progress")
     topic = relationship("Topic")
     __table_args__ = (
-        UniqueConstraint('user_id','topic_id'),
-    )
+    UniqueConstraint('user_id', 'topic_id', name='unique_user_topic'),
+)
     
 
 
