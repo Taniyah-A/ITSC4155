@@ -23,21 +23,24 @@ export default function QuestionsScreen() {
   const [selected, setSelected] = useState(null);
   const [showFeedback, setShowFeedback] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [score, setScore] = useState(0);     
+  const [difficulty, setDifficulty] = useState("easy");
+  const scoreRef = useRef(0);
 
   const question = questions[questionIndex];
 
 
   //fetch all questions from the db
   useEffect(() => {
-    fetchQuestions();
+    fetchQuestions(difficulty); //fetch based on the difficulty
   },[]);
 
-  const fetchQuestions = async () => {
+  const fetchQuestions = async (diff = "easy") => {
     try{
       const token = await AsyncStorage.getItem("token");
 
       const response = await fetch(
-        `${API_BASE_URL}/topics/1/questions?difficulty=easy&limit=10`, //fetching 10 questions that are easy
+        `${API_BASE_URL}/topics/1/questions?difficulty=${diff}&limit=10`, //changed to accept difficulty as the parameter
          {
           headers: {
             "Authorization": `Bearer ${token}` //sending the token 
@@ -68,8 +71,12 @@ export default function QuestionsScreen() {
     setSelected(choice);
     setShowFeedback(true); 
 
+    const correct = choice === question.correct_answer;
+    if (correct) setScore((prev) => prev + 1);
+    scoreRef.current += 1;
+
     const choiceObj = question.choiceObjects.find(
-      (c) => c.choice_text === choice //find the idof the choice selected
+      (c) => c.choice_text === choice //find the id of the choice selected
 
     );
 
@@ -80,8 +87,9 @@ export default function QuestionsScreen() {
       const result = await fetch(
         `${API_BASE_URL}/questions/submit` ,{
           method: "POST",
-          headers: {"Content-Type": "application/json"},
+          headers: {"Content-Type": "application/json",
           "Authorization": `Bearer ${token}`, 
+          },
           body: JSON.stringify({
             user_id: 1,
             question_id: question.id,
@@ -97,11 +105,32 @@ export default function QuestionsScreen() {
   };
 
   const handleNext = () => {
-  if (questionIndex + 1 >= questions.length) {
-    router.replace("/ActivityMap"); //goes to activity map after 10 questions...replace with actual screen
+  const isLastQuestion = questionIndex + 1 >= questions.length;
+
+  if (isLastQuestion) {
+    if (scoreRef.current >= 10) { 
+      if (difficulty === "easy") {
+        setDifficulty("medium");
+        setScore(0);
+        scoreRef.current = 0; 
+        setQuestionIndex(0);
+        fetchQuestions("medium"); 
+      } else if (difficulty === "medium") {
+        setDifficulty("hard");
+        setScore(0);
+        scoreRef.current = 0; 
+        setQuestionIndex(0);
+        fetchQuestions("hard");   
+      } else {
+        router.replace("/ActivityMap");
+      }
+    } else {
+      router.replace("/ActivityMap");
+    }
   } else {
     setQuestionIndex((prev) => prev + 1);
   }
+
   setSelected(null);
   setShowFeedback(false);
 };
