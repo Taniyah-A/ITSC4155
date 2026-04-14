@@ -91,7 +91,7 @@ export default function ActivityMap() {
                             ]}
                         >
                             <Image
-                                source={require("../assets/images/avatar.jpeg")}
+                                source={require("../assets/images/logo.png")}
                                 style={styles.avatar}
                             />
                         </Animated.View>
@@ -137,7 +137,7 @@ export default function ActivityMap() {
 
                         <TouchableOpacity onPress={() => router.push("/tabs/profileSettings")}>
                             <Image 
-                                source={require("../assets/images/avatar.jpeg")}
+                                source={require("../assets/images/logo.png")}
                                 style={styles.navImageAvatar}
                             />
                         </TouchableOpacity>
