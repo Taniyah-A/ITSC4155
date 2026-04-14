@@ -1,5 +1,5 @@
 # app/main.py
-import datetime
+from datetime import datetime
 from typing import List
 from fastapi import FastAPI, Depends, HTTPException, Security
 from sqlalchemy.orm import Session
@@ -8,7 +8,7 @@ from app.db.database import SessionLocal, engine, Base
 from fastapi.middleware.cors import CORSMiddleware
 
 # Models
-from app.models.user import User, Parents,Topic, Questions,UserProgress
+from app.models.user import User, Parents,Topic, Questions,UserProgress, DifficultyLevel
 
 # Schemas
 from app.schemas.user_schema import UserCreate, UserResponse, UserLogin
@@ -211,6 +211,8 @@ def answer_question(
             topic_id = question.topic_id
         )
         db.add(progress)
+    if not progress.difficulty_level:
+        progress.difficulty_level = DifficultyLevel.easy
 
     progress.times_attempted += 1
 
@@ -224,18 +226,18 @@ def answer_question(
 
     # Increase difficulty
     if progress.current_streak >= 5:
-        if progress.difficulty_level == "easy":
-            progress.difficulty_level = "medium"
-        elif progress.difficulty_level == "medium":
-            progress.difficulty_level = "hard"
+        if progress.difficulty_level == DifficultyLevel.easy:
+            progress.difficulty_level = DifficultyLevel.medium
+        elif progress.difficulty_level == DifficultyLevel.medium:
+            progress.difficulty_level = DifficultyLevel.hard
         progress.current_streak = 0
 
 # Decrease difficulty
     if progress.wrong_streak >= 2:
-        if progress.difficulty_level == "hard":
-            progress.difficulty_level = "medium"
-        elif progress.difficulty_level == "medium":
-            progress.difficulty_level = "easy"
+        if progress.difficulty_level == DifficultyLevel.hard:
+            progress.difficulty_level = DifficultyLevel.medium
+        elif progress.difficulty_level == DifficultyLevel.medium:
+            progress.difficulty_level = DifficultyLevel.easy
         progress.wrong_streak = 0
 
 
@@ -246,7 +248,7 @@ def answer_question(
         "Correct": is_correct,
         "Score": score,
         "Streak": progress.current_streak,
-        "Diffculty": progress.difficulty_level
+        "Difficulty": progress.difficulty_level
     }
 
 #-----------------
@@ -280,7 +282,7 @@ def get_child_progress(
         if p.times_attempted > 0 else 0,
         2
         ),
-        "Diffculty": p.difficulty_level,
+        "Difficulty": p.difficulty_level,
         "Streak": p.current_streak
         }
         for p in progress
