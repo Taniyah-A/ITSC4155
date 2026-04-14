@@ -7,12 +7,13 @@ from fastapi.security import HTTPBearer
 from fastapi.middleware.cors import CORSMiddleware
 
 # Models
-from app.models.user import User, Parents,Topic, Questions, AnswerChoices, UserAnswer, UserProgress
+from app.models.user import User, Parents,Topic, Questions, AnswerChoices, UserAnswer, UserProgress, UserAchievement, Achievement
 
 # Schemas
 from app.schemas.user_schema import UserCreate, UserResponse, UserLogin
 from app.schemas.parent_schema import ParentCreate, ParentLogin, ParentResponse
 from app.schemas.questions_schema import QuestionsSchema, TopicSchema, QuestionSubmitSchema
+from app.schemas.achievement_schema import AchievementSchema, UserAchievementSchema
 
 
 from app.db.database import SessionLocal, engine, Base
@@ -317,4 +318,59 @@ def submit_question(
         "is_correct":  is_correct
     }
 
+
+#-----------------
+#Achievement Routes
+#-----------------
+#used to get all the achievements that the kid can earn
+@app.get("/achievements", response_model=List[AchievementSchema])
+def get_all_achievements(db: Session = Depends(get_db)):
+    return db.query(Achievement).all()
+
+#be specfic when fetching achievements for each kid
+@app.get("/student/achievements", response_model=List[UserAchievementSchema])
+def get_student_achievements(
+    db: Session = Depends(get_db),
+    current=Depends(get_current_user)
+):
+    if current["role"] != "student":
+        raise HTTPException(status_code=403, detail="Students only")
+    
+    student = db.query(User).filter(User.username == current["sub"]).first()
+
+    return(
+        db.query(UserAchievement)
+        .options(joinedload(UserAchievement.achievement))
+        .filter(UserAchievement.user_id == student.id)
+        .all()
+    )
+
+@app.post("/student/achievements/{achievement_id}")
+def award_achievement(
+    achievement_id: int,
+    db: Session = Depends(get_db),
+    current=Depends(get_current_user)
+):
+    if current["role"] != "student":
+        raise HTTPException(status_code=403, detail="Student only")
+    
+    student = db.query(User).filter(User.username == current["sub"]).first()
+
+    #be sure they don't already have it
+    already_earned = db.query(UserAchievement).filter(
+        UserAchievement.user_id == student.id,
+        UserAchievement.achievement_id ==achievement_id
+    ).first()
+
+    if already_earned:
+        return{"message:": "Achievement already earned!"}
+    
+    new_achievement = UserAchievement(
+        user_id=student.id,
+        achievement_id=achievement_id
+    )
+    db.add(new_achievement)
+    db.commit()
+
+    return{"message": "Achievement unlocked!"}
 

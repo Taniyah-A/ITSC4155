@@ -29,6 +29,6 @@ class TopicSchema(BaseModel):
         from_attributes = True
 
 class QuestionSubmitSchema(BaseModel):
-    user_id = int
+    user_id: int
     question_id: int
     answer_choice_id: int

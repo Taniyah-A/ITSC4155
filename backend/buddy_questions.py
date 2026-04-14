@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
 from app.db.database import SessionLocal, engine, Base
-from app.models.user import Topic, Questions, AnswerChoices
+from app.models.user import Topic, Questions, AnswerChoices, Achievement
 
 #Questions:
 
@@ -248,6 +248,7 @@ QUESTION_BANK = [
 ]
 
 
+
 def seed(db: Session):
     print("Starting Brainy Buddie question seed...\n")
  
@@ -297,14 +298,67 @@ def seed(db: Session):
     print(f"\nSeed complete! Your database is ready.")
     print(f"   Topics seeded  : {len(QUESTION_BANK)}")
     print(f"   Total questions: {total_questions}")
- 
+
+
+def seed_achievements(db: Session):
+    """
+    Seeds the Achievement table with initial milestones.
+    Uses placeholders for badge_icon to satisfy NOT NULL constraints.
+    """
+    achievements_to_add = [
+        {
+            "name": "First Step!", 
+            "description": "Answer your first question correctly.", 
+            "badge_icon": "badge1" #maybe a star or something for the badge
+        },
+        {
+            "name": "Math Explorer", 
+            "description": "Complete all easy questions in any topic.", 
+            "badge_icon": "badge2" 
+        },
+        {
+            "name": "Shape Shifter", 
+            "description": "Complete the Shapes topic.", 
+            "badge_icon": "badge3" #something about shapes for badge
+        },
+        {
+            "name": "Addition Ace", 
+            "description": "Get a perfect score on a Basic Addition quiz.", 
+            "badge_icon": "badge4" #plus sign badge
+        },
+        {
+            "name": "Number Master", 
+            "description": "Complete all 'Hard' difficulty questions.", 
+            "badge_icon": "badge5" #trophy image maybe
+        }
+    ]
+
+    try:
+        for data in achievements_to_add:
+            #check if achievement already exists by name to prevent duplicates
+            existing = db.query(Achievement).filter_by(name=data["name"]).first()
+            if not existing:
+                new_achievement = Achievement(
+                    name=data["name"],
+                    description=data["description"],
+                    badge_icon=data["badge_icon"]
+                )
+                db.add(new_achievement)
+        
+        db.commit()
+        print("Achievements seeded successfully!")
+    except Exception as e:
+        db.rollback()
+        print(f"Error seeding achievements: {e}")
  
 
  
 if __name__ == "__main__":
     Base.metadata.create_all(bind=engine)
     db = SessionLocal()
+    
     try:
         seed(db)
+        seed_achievements(db) 
     finally:
         db.close()
