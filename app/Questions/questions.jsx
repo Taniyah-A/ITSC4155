@@ -7,7 +7,8 @@ import {
   Text,
   TouchableOpacity,
   View
-} from "react-native";
+} from "react-native"; 
+import { Audio } from "expo-av";
 //import { mockQuestions } from "../src/data/mockQuestions";
 //import { questionDb } from "../src/data/buddy_question";
 
@@ -85,6 +86,27 @@ export default function QuestionsScreen() {
 };
 
 
+  const playSoundEffect = async (file) => {
+    try {
+      const soundSetting = await AsyncStorage.getItem("soundEnabled");
+      const isEnabled = soundSetting ? JSON.parse(soundSetting) : false;
+
+      if (!isEnabled) return;
+
+      const { sound } = await Audio.Sound.createAsync(file, {
+        shouldPlay: true,
+      });
+
+      sound.setOnPlaybackStatusUpdate((status) => {
+        if (status.didJustFinish) {
+          sound.unloadAsync();
+        }
+      });
+    } catch (error) {
+      console.log("Sound error:", error);
+    }
+  };
+
   const handleSelect = async (choice) => {
     console.log("Selected:", JSON.stringify(choice));
     console.log("Correct:", JSON.stringify(question.correct_answer));
@@ -93,8 +115,17 @@ export default function QuestionsScreen() {
     setShowFeedback(true); 
 
     const correct = choice === question.correct_answer;
-    if (correct) setScore((prev) => prev + 1);
-    scoreRef.current += 1;
+    
+
+    if (correct) {
+      setScore((prev) => prev + 1);
+      scoreRef.current += 1;
+
+      playSoundEffect(require("../../assets/images/audios/correctAns_audio.mp3"));
+      console.log("playing sound");
+    } else {
+      playSoundEffect(require("../../assets/images/audios/wrongAns_audio.mp3"));
+    }
 
     const choiceObj = question.choiceObjects.find(
       (c) => c.choice_text === choice //find the id of the choice selected
@@ -130,6 +161,7 @@ export default function QuestionsScreen() {
 
   if (isLastQuestion) {
     if (scoreRef.current >= 10) { 
+      playSoundEffect(require("../../assets/images/audios/level_complete.mp3"));
       if (difficulty === "easy") {
         setDifficulty("medium");
         setScore(0);
@@ -282,8 +314,6 @@ export default function QuestionsScreen() {
          >
          <Text style={styles.nextText}>Next Question</Text>
          </TouchableOpacity>
-
-          <Text style={styles.feedbackText}>Excellent!</Text>
         </View>
 
     )}
@@ -381,7 +411,7 @@ feedbackCorrect: {
     fontSize: 24,
     fontWeight: "600",
     textAlign: "center",
-    marginBottom: 20,
+    marginBottom: 10,
     color: "#58CC02",
   },
 

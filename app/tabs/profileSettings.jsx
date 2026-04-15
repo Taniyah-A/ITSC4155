@@ -1,6 +1,6 @@
 import { useRouter } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useEffect, useState } from "react";
+import { use, useEffect, useState } from "react";
 import {
     Image,
     SafeAreaView,
@@ -19,6 +19,11 @@ const ProfilePage = () => {
   const [isNotificationsEnabled, setIsNotificationsEnabled] = useState(true);
   const [isMusicEnabled, setIsMusicEnabled] = useState(false);
   const [isSoundEnabled, setIsSoundEnabled] = useState(false);
+
+  const toggleSound = async (value) => {
+    setIsSoundEnabled(value);
+    await AsyncStorage.setItem("soundEnabled", JSON.stringify(value));
+  };
 
   // Reusable component for the menu rows
   const MenuRow = ({ label, hasSwitch, value, onValueChange, onPress }) => (
@@ -47,6 +52,17 @@ const ProfilePage = () => {
       setUsername(name || "User");
     };
     loadUser();
+  }, []);
+
+  // Enable sound throughout the app.
+  useEffect(() => {
+    const loadSettings = async () => {
+      const sound = await AsyncStorage.getItem("soundEnabled");
+      if (sound !== null) {
+        setIsSoundEnabled(JSON.parse(sound));
+      }
+    };
+    loadSettings();
   }, []);
 
   return (
@@ -101,7 +117,7 @@ const ProfilePage = () => {
             label="Sound"
             hasSwitch
             value={isSoundEnabled}
-            onValueChange={setIsSoundEnabled}
+            onValueChange={toggleSound}
           />
 
           <MenuRow label="More" onPress={() => {}} />

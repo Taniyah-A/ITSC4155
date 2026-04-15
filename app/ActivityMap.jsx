@@ -3,6 +3,7 @@ import {router, useFocusEffect} from 'expo-router';
 import {View, Text, ScrollView, Image, ImageBackground, TouchableOpacity, StyleSheet, Animated, Dimensions, SafeAreaView} from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { API_BASE_URL } from "../lib/api";
+import { Audio } from "expo-av";
 
 const {width} = Dimensions.get("window");
 
@@ -16,6 +17,7 @@ const levels = [
 ];
 
 export default function ActivityMap() {
+    const soundRef = useRef(null);
     const [currentLevel, setCurrentLevel] = useState(1);
     const scrollRef = useRef(null);
 
@@ -138,6 +140,43 @@ export default function ActivityMap() {
             setCurrentLevel(currentLevel + 1);
         }
     };
+
+    // This function is for playing sound in the background
+    const playBackgroundMusic = async () => {
+        try {
+            const soundSetting = await AsyncStorage.getItem("soundEnabled");
+            const isEnabled = soundSetting ? JSON.parse(soundSetting) : false;
+
+            if (!isEnabled) return;
+
+            const { sound } = await Audio.Sound.createAsync(
+                require("../assets/images/audios/activityMap_audio.mp3"),
+                {
+                    shouldPlay: true,
+                    isLooping: true,
+                    volume: 0.5,
+                }
+            );
+            soundRef.current = sound;
+        } catch (error) {
+            console.log("Error playing sound:", error);
+        }
+    };
+
+    // Start and stop music
+    useFocusEffect(
+        useCallback(() => {
+            playBackgroundMusic();
+
+            return () => {
+                if (soundRef.current) {
+                    soundRef.current.stopAsync();
+                    soundRef.current.unloadAsync();
+                    soundRef.current = null;
+                }
+            };
+        }, [])
+    );
 
     return (
         <View style={styles.container}>
