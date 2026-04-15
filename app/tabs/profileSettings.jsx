@@ -66,7 +66,12 @@ const ProfilePage = () => {
         {/* Content Section (The White Part) */}
         <View style={styles.content}>
           <MenuRow label="Profile" onPress={() => {}} />
-          <MenuRow label="Achievements" onPress={() => {}} />
+          <MenuRow 
+            label="Achievements" 
+            onPress={() => {
+              router.replace("/tabs/achievements");
+            }}
+          />
 
           <MenuRow
             label="Notifications"
@@ -108,21 +113,21 @@ const ProfilePage = () => {
             />
           </TouchableOpacity>
 
-          <TouchableOpacity onPress={() => router.push("/achievements")}>
+          <TouchableOpacity onPress={() => router.push("/tabs/achievements")}>
             <Image
               source={require("../../assets/images/achievement.png")}
               style={styles.navImage}
             />
           </TouchableOpacity>
 
-          <TouchableOpacity onPress={() => router.push("/stats")}>
+          <TouchableOpacity onPress={() => router.push("/tabs/stats")}>
             <Image
               source={require("../../assets/images/stats.png")}
               style={styles.navImage}
             />
           </TouchableOpacity>
 
-          <TouchableOpacity onPress={() => router.push("/tabs/profile")}>
+          <TouchableOpacity onPress={() => router.push("/tabs/profileSettings")}>
             <Image
               source={require("../../assets/images/avatar.jpeg")}
               style={styles.navImageAvatar}
