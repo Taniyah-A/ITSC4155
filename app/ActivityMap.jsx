@@ -34,6 +34,8 @@ export default function ActivityMap() {
         points: 0,
     })
 
+    const hearts = progress.filter(p => p.Attempted > 0).length;
+
     const fetchProgress = async () => {
         try {
             const token = await AsyncStorage.getItem("token");
@@ -246,7 +248,7 @@ export default function ActivityMap() {
                     <Text style={styles.stat}>⚙️ {stats.Attempted}</Text>
                     <Text style={styles.stat}>🔥 {stats.Correct}</Text>
                     <Text style={styles.stat}>💎 {stats.points}</Text>
-                    <Text style={styles.stat}>❤️ 4</Text>
+                    <Text style={styles.stat}>❤️ {hearts}</Text>
                 </View>
             </SafeAreaView>
             

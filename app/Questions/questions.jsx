@@ -20,6 +20,9 @@ import { router, useLocalSearchParams } from "expo-router";
 import { API_BASE_URL } from "../../lib/api";
 
 export default function QuestionsScreen() {
+  // Load the sounds at the beginning to avoid lag.
+  const correctSoundRef = useRef(null);
+  const wrongSoundRef = useRef(null);
 
   const [questions, setQuestions] = useState([]);
   const [questionIndex, setQuestionIndex] = useState(0);
@@ -48,6 +51,36 @@ export default function QuestionsScreen() {
   useEffect(() => {
     fetchQuestions(difficulty); //fetch based on the difficulty
   },[]);
+
+  useEffect(() => {
+    let isMounted = true;
+    const loadSounds = async () => {
+      const soundSetting = await AsyncStorage.getItem("soundEnabled");
+      const isEnabled = soundSetting ? JSON.parse(soundSetting) : false;
+      if (!isEnabled) return;
+
+      const { sound: correct } = await Audio.Sound.createAsync(
+        require("../../assets/images/audios/correctAns_audio.mp3")
+      );
+
+      const { sound: wrong } = await Audio.Sound.createAsync(
+        require("../../assets/images/audios/wrongAns_audio.mp3")
+      );
+
+      if (isMounted) {
+        correctSoundRef.current = correct;
+        wrongSoundRef.current = wrong;
+      }
+    };
+
+    loadSounds();
+
+    return () => {
+      isMounted = false;
+      correctSoundRef.current?.unloadAsync?.();
+      wrongSoundRef.current?.unloadAsync?.();
+    };
+  }, []);
 
   const fetchQuestions = async (diff = "easy") => {
   try {
@@ -85,28 +118,6 @@ export default function QuestionsScreen() {
   }
 };
 
-
-  const playSoundEffect = async (file) => {
-    try {
-      const soundSetting = await AsyncStorage.getItem("soundEnabled");
-      const isEnabled = soundSetting ? JSON.parse(soundSetting) : false;
-
-      if (!isEnabled) return;
-
-      const { sound } = await Audio.Sound.createAsync(file, {
-        shouldPlay: true,
-      });
-
-      sound.setOnPlaybackStatusUpdate((status) => {
-        if (status.didJustFinish) {
-          sound.unloadAsync();
-        }
-      });
-    } catch (error) {
-      console.log("Sound error:", error);
-    }
-  };
-
   const handleSelect = async (choice) => {
     console.log("Selected:", JSON.stringify(choice));
     console.log("Correct:", JSON.stringify(question.correct_answer));
@@ -121,10 +132,9 @@ export default function QuestionsScreen() {
       setScore((prev) => prev + 1);
       scoreRef.current += 1;
 
-      playSoundEffect(require("../../assets/images/audios/correctAns_audio.mp3"));
-      console.log("playing sound");
+      correctSoundRef.current?.replayAsync?.();
     } else {
-      playSoundEffect(require("../../assets/images/audios/wrongAns_audio.mp3"));
+      wrongSoundRef.current?.replayAsync?.();
     }
 
     const choiceObj = question.choiceObjects.find(
