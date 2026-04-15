@@ -15,7 +15,7 @@ import {
 
 
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import { API_BASE_URL } from "../../lib/api";
 
 export default function QuestionsScreen() {
@@ -28,6 +28,7 @@ export default function QuestionsScreen() {
   const [score, setScore] = useState(0);     
   const [difficulty, setDifficulty] = useState("easy");
   const scoreRef = useRef(0);
+  const { topicId } = useLocalSearchParams(); 
 
   const backgrounds = [
     require("../../assets/images/bg1.jpg"),
@@ -52,7 +53,7 @@ export default function QuestionsScreen() {
     const token = await AsyncStorage.getItem("token");
 
     const response = await fetch(
-      `${API_BASE_URL}/topics/1/questions?difficulty=${diff}&limit=10`,
+      `${API_BASE_URL}/topics/${topicId}/questions?difficulty=${diff}&limit=10`,
       {
         headers: {
           "Authorization": `Bearer ${token}`
